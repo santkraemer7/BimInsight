@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\BimInsight.Core\BimInsight.Core.csproj" />
     <ProjectReference Include="..\..\src\BimInsight.Quantities\BimInsight.Quantities.csproj" />
+    <ProjectReference Include="..\..\src\BimInsight.Rules\BimInsight.Rules.csproj" />
   </ItemGroup>
 
 </Project>

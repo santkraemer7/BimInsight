@@ -1,0 +1,32 @@
+{
+  "rules": [
+    {
+      "id": "R001",
+      "description": "Paredes devem ter material definido",
+      "ifcType": "IfcWall",
+      "check": "HasMaterial",
+      "severity": "Error"
+    },
+    {
+      "id": "R002",
+      "description": "Todos os elementos devem ter nome",
+      "ifcType": "*",
+      "check": "HasName",
+      "severity": "Warning"
+    },
+    {
+      "id": "R003",
+      "description": "Paredes devem estar associadas a um pavimento",
+      "ifcType": "IfcWall",
+      "check": "HasStorey",
+      "severity": "Warning"
+    },
+    {
+      "id": "R004",
+      "description": "Janelas devem ter tipo definido",
+      "ifcType": "IfcWindow",
+      "check": "HasTypeName",
+      "severity": "Info"
+    }
+  ]
+}
