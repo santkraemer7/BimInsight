@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BimInsight.Cli/BimInsight.Cli.csproj" />
+    <Project Path="src/BimInsight.Core/BimInsight.Core.csproj" />
+    <Project Path="src/BimInsight.Quantities/BimInsight.Quantities.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BimInsight.Tests/BimInsight.Tests.csproj" />
+  </Folder>
+</Solution>
