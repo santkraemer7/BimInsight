@@ -164,9 +164,15 @@
             var result = await Task.Run(() => new IfcModelReader().Read(tempPath));
 
             var rulesPath = Path.Combine(AppContext.BaseDirectory, "rules", "regras-basicas.json");
-            violations = File.Exists(rulesPath)
-                ? RuleEngine.Evaluate(result, RuleLoader.Load(rulesPath))
-                : Array.Empty<Violation>();
+                       if (File.Exists(rulesPath))
+            {
+                violations = RuleEngine.Evaluate(result, RuleLoader.Load(rulesPath));
+            }
+            else
+            {
+                violations = Array.Empty<Violation>();
+                error = $"Arquivo de regras não encontrado em: {rulesPath}";
+            }
 
             elements = result;
             fileName = e.File.Name;
