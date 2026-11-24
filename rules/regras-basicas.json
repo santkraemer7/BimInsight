@@ -27,6 +27,13 @@
       "ifcType": "IfcWindow",
       "check": "HasTypeName",
       "severity": "Info"
+    },
+    {
+      "id": "R005",
+      "description": "Paredes devem ter área de quantitativo preenchida",
+      "ifcType": "IfcWall",
+      "check": "HasArea",
+      "severity": "Warning"
     }
   ]
 }

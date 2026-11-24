@@ -5,6 +5,7 @@
     <Project Path="src/BimInsight.Export/BimInsight.Export.csproj" />
     <Project Path="src/BimInsight.Quantities/BimInsight.Quantities.csproj" />
     <Project Path="src/BimInsight.Rules/BimInsight.Rules.csproj" />
+    <Project Path="src/BimInsight.Web/BimInsight.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/BimInsight.Tests/BimInsight.Tests.csproj" />

@@ -1,0 +1,214 @@
+@page "/"
+@rendermode InteractiveServer
+@using System.Globalization
+@using BimInsight.Core
+@using BimInsight.Core.Models
+@using BimInsight.Quantities
+@using BimInsight.Rules
+
+<PageTitle>BIM Insight</PageTitle>
+
+<h1 class="mb-1">BIM Insight</h1>
+<p class="text-muted">Envie um arquivo IFC para ver os quantitativos e verificar a qualidade do modelo.</p>
+
+<InputFile OnChange="OnFileSelected" accept=".ifc" class="form-control mb-3" />
+
+@if (loading)
+{
+    <div class="alert alert-info">Lendo o modelo, aguarde...</div>
+}
+
+@if (error is not null)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+@if (elements is not null)
+{
+    <h5 class="mb-3">@fileName</h5>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card text-center h-100"><div class="card-body">
+                <div class="fs-2 fw-bold">@elements.Count</div>
+                <div class="text-muted">Elementos</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center h-100"><div class="card-body">
+                <div class="fs-2 fw-bold">@elements.Select(e => e.IfcType).Distinct().Count()</div>
+                <div class="text-muted">Tipos IFC</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center h-100"><div class="card-body">
+                <div class="fs-2 fw-bold">@elements.Where(e => e.Storey is not null).Select(e => e.Storey).Distinct().Count()</div>
+                <div class="text-muted">Pavimentos</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center h-100"><div class="card-body">
+                <div class="fs-2 fw-bold @(violations.Count > 0 ? "text-danger" : "text-success")">@violations.Count</div>
+                <div class="text-muted">Violações</div>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-3 mb-2">
+        <h4 class="mb-0">Quantitativos</h4>
+        <select class="form-select w-auto" @bind="mode" @bind:after="Recalculate">
+            @foreach (var m in Enum.GetValues<GroupMode>())
+            {
+                <option value="@m">@ModeLabel(m)</option>
+            }
+        </select>
+    </div>
+
+    <div class="mb-4">
+        @foreach (var r in rows)
+        {
+            <div class="d-flex align-items-center mb-1">
+                <div class="text-truncate" style="width:220px" title="@r.Group">@r.Group</div>
+                <div class="flex-grow-1 bg-light rounded mx-2">
+                    <div class="bg-primary rounded" style="height:20px; width:@Pct(r)%"></div>
+                </div>
+                <div class="text-end" style="width:50px">@r.Count</div>
+            </div>
+        }
+    </div>
+
+    <div class="table-responsive mb-4">
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>Grupo</th>
+                    <th class="text-end">Qtd</th>
+                    <th class="text-end">Área (m²)</th>
+                    <th class="text-end">Volume (m³)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in rows)
+                {
+                    <tr>
+                        <td>@r.Group</td>
+                        <td class="text-end">@r.Count</td>
+                        <td class="text-end">@r.TotalArea.ToString("N2")</td>
+                        <td class="text-end">@r.TotalVolume.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <h4>Verificação de regras</h4>
+    @if (violations.Count == 0)
+    {
+        <div class="alert alert-success">Nenhuma violação encontrada.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th>Severidade</th>
+                        <th>Regra</th>
+                        <th>Descrição</th>
+                        <th>Tipo</th>
+                        <th>Elemento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var v in violations.OrderByDescending(v => v.Severity))
+                    {
+                        <tr>
+                            <td><span class="badge @BadgeClass(v.Severity)">@v.Severity</span></td>
+                            <td>@v.RuleId</td>
+                            <td>@v.Description</td>
+                            <td>@v.IfcType</td>
+                            <td>@(v.ElementName ?? v.GlobalId)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+@code {
+    private const long MaxFileSize = 200L * 1024 * 1024; // 200 MB
+
+    private IReadOnlyList<BimElement>? elements;
+    private IReadOnlyList<Violation> violations = Array.Empty<Violation>();
+    private IReadOnlyList<QuantityRow> rows = Array.Empty<QuantityRow>();
+    private GroupMode mode = GroupMode.IfcType;
+    private string? fileName;
+    private string? error;
+    private bool loading;
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        error = null;
+        loading = true;
+        var tempPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.ifc");
+
+        try
+        {
+            await using (var input = e.File.OpenReadStream(MaxFileSize))
+            await using (var output = File.Create(tempPath))
+            {
+                await input.CopyToAsync(output);
+            }
+
+            var result = await Task.Run(() => new IfcModelReader().Read(tempPath));
+
+            var rulesPath = Path.Combine(AppContext.BaseDirectory, "rules", "regras-basicas.json");
+            violations = File.Exists(rulesPath)
+                ? RuleEngine.Evaluate(result, RuleLoader.Load(rulesPath))
+                : Array.Empty<Violation>();
+
+            elements = result;
+            fileName = e.File.Name;
+            Recalculate();
+        }
+        catch (Exception ex)
+        {
+            elements = null;
+            error = $"Não foi possível ler o arquivo: {ex.Message}";
+        }
+        finally
+        {
+            loading = false;
+            if (File.Exists(tempPath)) File.Delete(tempPath);
+        }
+    }
+
+    private void Recalculate()
+    {
+        if (elements is not null)
+            rows = QuantityCalculator.Calculate(elements, mode);
+    }
+
+    private string Pct(QuantityRow row)
+    {
+        var max = rows.Count == 0 ? 1 : rows.Max(r => r.Count);
+        return (row.Count * 100.0 / max).ToString("0.##", CultureInfo.InvariantCulture);
+    }
+
+    private static string ModeLabel(GroupMode m) => m switch
+    {
+        GroupMode.IfcType  => "Por tipo IFC",
+        GroupMode.Storey   => "Por pavimento",
+        GroupMode.TypeName => "Por tipo de elemento",
+        GroupMode.Material => "Por material",
+        _ => m.ToString()
+    };
+
+    private static string BadgeClass(Severity s) => s switch
+    {
+        Severity.Error   => "text-bg-danger",
+        Severity.Warning => "text-bg-warning",
+        _                => "text-bg-info"
+    };
+}

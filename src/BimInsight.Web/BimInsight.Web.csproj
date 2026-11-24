@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\BimInsight.Core\BimInsight.Core.csproj" />
+    <ProjectReference Include="..\BimInsight.Quantities\BimInsight.Quantities.csproj" />
+    <ProjectReference Include="..\BimInsight.Rules\BimInsight.Rules.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\rules\regras-basicas.json"
+          Link="rules\regras-basicas.json"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+</Project>
