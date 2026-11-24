@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
@@ -22,6 +23,7 @@
     <ProjectReference Include="..\..\src\BimInsight.Core\BimInsight.Core.csproj" />
     <ProjectReference Include="..\..\src\BimInsight.Quantities\BimInsight.Quantities.csproj" />
     <ProjectReference Include="..\..\src\BimInsight.Rules\BimInsight.Rules.csproj" />
+    <ProjectReference Include="..\..\src\BimInsight.Export\BimInsight.Export.csproj" />
   </ItemGroup>
 
 </Project>

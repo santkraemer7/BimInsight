@@ -4,6 +4,7 @@
     <ProjectReference Include="..\BimInsight.Core\BimInsight.Core.csproj" />
     <ProjectReference Include="..\BimInsight.Quantities\BimInsight.Quantities.csproj" />
     <ProjectReference Include="..\BimInsight.Rules\BimInsight.Rules.csproj" />
+    <ProjectReference Include="..\BimInsight.Export\BimInsight.Export.csproj" />
   </ItemGroup>
 
   <ItemGroup>

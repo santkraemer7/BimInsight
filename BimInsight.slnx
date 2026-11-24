@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/BimInsight.Cli/BimInsight.Cli.csproj" />
     <Project Path="src/BimInsight.Core/BimInsight.Core.csproj" />
+    <Project Path="src/BimInsight.Export/BimInsight.Export.csproj" />
     <Project Path="src/BimInsight.Quantities/BimInsight.Quantities.csproj" />
     <Project Path="src/BimInsight.Rules/BimInsight.Rules.csproj" />
   </Folder>
